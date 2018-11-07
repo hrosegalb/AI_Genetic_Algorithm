@@ -26,6 +26,14 @@ class Genome(object):
                 else:
                     self.__fitness += vals[i]
 
+    
+    def get_sequence(self):
+        return self.__sequence
+
+    
+    def get_fitness(self):
+        return self.__fitness
+
 
     def print(self):
         print("Sequence: {0}\nFitness: {1}".format(self.__sequence, self.__fitness))
