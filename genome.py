@@ -28,10 +28,12 @@ class Genome(object):
 
     
     def get_sequence(self):
+        ''' Returns the genome's sequence.'''
         return self.__sequence
 
     
     def get_fitness(self):
+        ''' Returns the genome's fitness value.'''
         return self.__fitness
 
 
