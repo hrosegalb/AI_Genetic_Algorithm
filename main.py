@@ -9,12 +9,13 @@ def sum_fitnesses(object_list):
     return sum([object_list[i].get_fitness() for i in range(len(object_list))])
 
 
-def main():
-    vals = [3, 5, 8, 10]
-    weights = [45, 40, 50, 90]
-    num_pop = 6
-    num_iter = 100
-    max_weight = 100
+def create_genome_population(vals, weights, max_weight, num_pop):
+    ''':param vals: List of integers
+       :param weights: List of integers
+       :param max_weight: integer
+       :param num_pop: integer
+       
+       Creates and returns a list of Genome objects.'''
 
     object_list = []
     for i in range(num_pop):
@@ -22,6 +23,19 @@ def main():
         genome = Genome(seq)
         genome.determine_fitness(vals, weights, max_weight)
         object_list.append(genome)
+
+    return object_list
+
+
+
+def main():
+    vals = [3, 5, 8, 10]             # The values of the items
+    weights = [45, 40, 50, 90]       # The weights of the items
+    num_pop = 6                      # Number of genomes in population
+    num_iter = 100                   # Number of times to iterate the algorithm
+    max_weight = 100                 # Maximum weight allowed in knapsack
+
+    object_list = create_genome_population(vals, weights, max_weight, num_pop)
     
     for i in range(len(object_list)):
         print("Genome #{0}:".format(i))
@@ -36,11 +50,6 @@ def main():
     genomes = [i for i in range(len(object_list))]
     parents = random.choices(genomes, breeding_weights, k=num_pop)
     print("Parents selected: {0}".format(parents))
-
-
- 
-
-
 
 
 if __name__ == '__main__':
