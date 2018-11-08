@@ -67,6 +67,7 @@ def select_parents(object_list, num_to_breed):
     print(breeding_weights)
 
     genomes = [i for i in range(len(object_list))]
+    print("Genomes: {0}\nLength of genomes: {1}".format(genomes, len(genomes)))
     parents = random.choices(genomes, breeding_weights, k=num_to_breed)
     return parents
 
@@ -98,8 +99,8 @@ def crossover(parent_list, object_list, vals, weights, max_weight):
         fitness_1 = determine_fitness(vals, weights, max_weight, child_1)
         fitness_2 = determine_fitness(vals, weights, max_weight, child_2)
         
-        list_of_children.append((fitness_1, child_1))
-        list_of_children.append((fitness_2, child_2))
+        list_of_children.append([fitness_1, child_1])
+        list_of_children.append([fitness_2, child_2])
         print("\nCrossover point: {0}".format(crossover_pt))
         print("Children of {0} and {1}:\n{2}\n{3}".format(parent_list[i], parent_list[i+1], child_1, child_2))
 
@@ -113,6 +114,7 @@ def main():
     num_iter = 100                   # Number of times to iterate the algorithm
     max_weight = 100                 # Maximum weight allowed in knapsack
     num_to_breed = 2                 # The number of parents chosen for reproduction
+    prob_of_mutation = 0.5           # The probability of a mutation occurring
 
     object_list = create_genome_population(vals, weights, max_weight, num_pop)
     
@@ -125,12 +127,22 @@ def main():
     print("Parents selected: {0}".format(parent_list))
     random.shuffle(parent_list)
 
-
     list_of_children = crossover(parent_list, object_list, vals, weights, max_weight)
     print("List of children: {0}".format(list_of_children))
 
-
-
+    for i in range(len(list_of_children)):
+        coin_flip = random.choices(population=[0,1], weights=[prob_of_mutation, 1-prob_of_mutation], k=1)
+        if coin_flip[0] == 1:
+            seq = list_of_children[i][1]
+            mutation_pt = random.randint(0, len(seq) - 1)
+            if seq[mutation_pt] == 1:
+                seq[mutation_pt] = 0
+            else:
+                seq[mutation_pt] = 1
+            fitness = determine_fitness(vals, weights, max_weight, seq)
+            list_of_children[i][0] = fitness
+            list_of_children[i][1] = seq
+            print("\nChild {0} has been mutated.\nUpdated sequence: {1}\nUpdated fitness: {2}".format(i, list_of_children[i][1], list_of_children[i][0]))
 
     
 
