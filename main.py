@@ -1,4 +1,5 @@
 import random
+import operator
 
 def determine_fitness(vals, weights, max_weight, sequence):
     ''':param vals: List of integers
@@ -41,7 +42,7 @@ def create_genome_population(vals, weights, max_weight, num_pop):
        genome[1] = list of integers representing the items chosen for knapsack'''
 
     object_list = []
-    for i in range(num_pop):
+    for _ in range(num_pop):
         seq = [random.randint(0,1) for i in range(len(vals))]
         fitness = determine_fitness(vals, weights, max_weight, seq)
         object_list.append([fitness, seq])
@@ -58,12 +59,12 @@ def select_parents(object_list, num_to_breed):
 
     genomes = [i for i in range(len(object_list))]
     sum_of_fitnesses = sum_fitnesses(object_list)
-    print("Sum of all fitnesses: {0}".format(sum_of_fitnesses))  
+    #print("Sum of all fitnesses: {0}".format(sum_of_fitnesses))  
 
     parents = []
     if sum_of_fitnesses > 0:
         breeding_weights = [object_list[i][0]/sum_of_fitnesses for i in range(len(object_list))]
-        print(breeding_weights)
+        #print(breeding_weights)
         parents = random.choices(population=genomes, weights=breeding_weights, k=num_to_breed)
     else:
         parents = random.choices(population=genomes, k=num_to_breed)
@@ -100,8 +101,8 @@ def crossover(parent_list, object_list, vals, weights, max_weight):
         
         list_of_children.append([fitness_1, child_1])
         list_of_children.append([fitness_2, child_2])
-        print("\nCrossover point: {0}".format(crossover_pt))
-        print("Children of {0} and {1}:\n{2}\n{3}".format(parent_list[i], parent_list[i+1], child_1, child_2))
+        #print("\nCrossover point: {0}".format(crossover_pt))
+        #print("Children of {0} and {1}:\n{2}\n{3}".format(parent_list[i], parent_list[i+1], child_1, child_2))
 
     return list_of_children
 
@@ -131,38 +132,61 @@ def mutate(list_of_children, prob_of_mutation, vals, weights, max_weight):
             fitness = determine_fitness(vals, weights, max_weight, seq)
             list_of_children[i][0] = fitness
             list_of_children[i][1] = seq
-            print("\nChild {0} has been mutated.\nUpdated sequence: {1}\nUpdated fitness: {2}".format(i, list_of_children[i][1], list_of_children[i][0]))
+            #print("\nChild {0} has been mutated.\nUpdated sequence: {1}\nUpdated fitness: {2}".format(i, list_of_children[i][1], list_of_children[i][0]))
     
     return list_of_children
 
 
+def choose_elite(list_of_children, object_list, num_pop):
+    ''':param list_of_children: List of genome lists
+       :param object_list: List of genome lists
+       :param num_pop: integer
+       
+       If the pool of children is smaller than the initial population, this function chooses the genomes in the 
+       parent population with the highest fitness scores until the number of genomes in list_of_children equals
+       the value of num_pop.'''
+
+    if len(list_of_children) < num_pop:
+        diff = num_pop - len(list_of_children)
+        for _ in range(diff):
+            elite = max(object_list, key=operator.itemgetter(0))
+            list_of_children.append(elite)
+            object_list.remove(elite)
+
+    return list_of_children
+
 
 def main():
-    vals = [3, 5, 8, 10]             # The values of the items
-    weights = [45, 40, 50, 90]       # The weights of the items
-    num_pop = 3                      # Number of genomes in population
-    num_iter = 100                   # Number of times to iterate the algorithm
-    max_weight = 100                 # Maximum weight allowed in knapsack
-    num_to_breed = 2                 # The number of parents chosen for reproduction
-    prob_of_mutation = 0.5           # The probability of a mutation occurring
-
-    object_list = create_genome_population(vals, weights, max_weight, num_pop)
-    
-    for i in range(len(object_list)):
-        print("Genome #{0}:".format(i))
-        print("Sequence: {0}".format(object_list[i][1]))
-        print("Fitness: {0}".format(object_list[i][0]))
-
-    parent_list = select_parents(object_list, num_to_breed)
-    print("Parents selected: {0}".format(parent_list))
-    random.shuffle(parent_list)
-
-    list_of_children = crossover(parent_list, object_list, vals, weights, max_weight)
-    print("List of children: {0}".format(list_of_children))
-
-    list_of_children = mutate(list_of_children, prob_of_mutation, vals, weights, max_weight)
+    vals = [3, 5, 8, 10]                 # The values of the items
+    weights = [45, 40, 50, 90]           # The weights of the items
+    #num_pop = 3                          # Number of genomes in population
+    num_iter = 100                       # Number of times to iterate the algorithm
+    max_weight = 100                     # Maximum weight allowed in knapsack
+    #num_to_breed = int(0.95 * num_pop)   # The number of parents chosen for reproduction
+    #prob_of_mutation = 0.5               # The probability of a mutation occurring
 
     
+    for num_pop in [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36]:
+        object_list = create_genome_population(vals, weights, max_weight, num_pop)
+        num_to_breed = int(0.85 * num_pop)
+        if num_to_breed % 2 != 0:
+            num_to_breed += 1
+        for prob_of_mutation in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+            for _ in range(num_iter):
+                parent_list = select_parents(object_list, num_to_breed)
+                #print("Parents selected: {0}".format(parent_list))
+                random.shuffle(parent_list)
+
+                list_of_children = crossover(parent_list, object_list, vals, weights, max_weight)
+                #print("List of children: {0}".format(list_of_children))
+
+                list_of_children = mutate(list_of_children, prob_of_mutation, vals, weights, max_weight)
+                next_gen = choose_elite(list_of_children, object_list, num_pop)
+                object_list = next_gen
+
+            best_choice = max(object_list, key=operator.itemgetter(0))
+            print("Population size: {0}, Chance of mutation: {1}, Best choice is {2}.".format(num_pop, prob_of_mutation, best_choice))
+
 
 
 if __name__ == '__main__':
