@@ -1,13 +1,6 @@
 import random
 import operator
 
-##################################################################################################################
-# Hannah Galbraith
-# CS541
-# Programming Assignment #2
-# 11/9/18
-##################################################################################################################
-
 def determine_fitness(vals, weights, max_weight, sequence):
     ''':param vals: List of integers
        :param weights: List of integers
